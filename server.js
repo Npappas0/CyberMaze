@@ -21,8 +21,8 @@ const rooms = {}; // Store active game rooms
 // Endpoint to create a game room
 app.post('/create-room', (req, res) => {
     const roomId = uuidv4(); // Generate a unique room ID
-    rooms[roomId] = { players: [] };
-    res.json({ roomId, inviteLink: `http://localhost:3000/room/${roomId}` });
+    rooms[roomId] = { players: [], host: null }; // Track the host
+    res.json({ roomId, inviteLink: `http://localhost:3000/?room=${roomId}` });
 });
 
 // WebSocket connection handling
@@ -34,11 +34,15 @@ io.on('connection', (socket) => {
             socket.emit('error', { message: 'Room not found' });
             return;
         }
-
-        rooms[roomId].players.push({ id: socket.id, name: playerName });
+    
+        const isHost = rooms[roomId].players.length === 0; // First player is host
+        if (isHost) rooms[roomId].host = socket.id;
+    
+        rooms[roomId].players.push({ id: socket.id, name: playerName, isHost });
         socket.join(roomId);
         io.to(roomId).emit('player-joined', rooms[roomId].players);
     });
+    
 
     socket.on('disconnect', () => {
         for (const roomId in rooms) {
@@ -47,6 +51,12 @@ io.on('connection', (socket) => {
         }
         console.log('User disconnected:', socket.id);
     });
+
+    socket.on('start-game', (roomId) => {
+        if (rooms[roomId] && rooms[roomId].host === socket.id) {
+            io.to(roomId).emit('game-started');
+        }
+    });    
 });
 
 app.use(express.static(path.join(__dirname, 'public')));

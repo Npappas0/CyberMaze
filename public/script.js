@@ -31,12 +31,26 @@ function joinRoom(roomId, playerName) {
 socket.on("player-joined", (players) => {
     const playersList = document.getElementById("playersList");
     playersList.innerHTML = "";
-    
+
+    const currentPlayer = players.find(p => p.id === socket.id);
+    const isHost = currentPlayer ? currentPlayer.isHost : false;
+
+    document.getElementById("startGameBtn").style.display = isHost ? "block" : "none";
+
     players.forEach(player => {
         const li = document.createElement("li");
-        li.textContent = player.name;
+        li.textContent = player.name + (player.isHost ? " (Host)" : "");
         playersList.appendChild(li);
     });
+});
+
+document.getElementById("startGameBtn").addEventListener("click", () => {
+    const roomId = document.getElementById("roomIdDisplay").innerText;
+    socket.emit("start-game", roomId);
+});
+
+socket.on("game-started", () => {
+    alert("The game has started!");
 });
 
 // Auto-join room if invite link is used
