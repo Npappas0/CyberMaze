@@ -32,7 +32,7 @@ const maze = [
 
 // Endpoint to create a game room
 app.post('/create-room', (req, res) => {
-    const roomId = uuidv4();
+    const roomId = Math.random().toString(36).substr(2, 6);
     rooms[roomId] = { players: {}, host: null };
     res.json({ roomId, inviteLink: `http://localhost:3000/?room=${roomId}` });
 });
