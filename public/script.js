@@ -61,3 +61,115 @@ window.onload = () => {
         document.getElementById("roomIdInput").value = roomId;
     }
 };
+
+//Game Setup
+//-------------------------------------------------------------------------------
+
+//GRID
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+
+// Grid settings
+const gridSize = 10;  // Number of tiles per row/column
+const tileSize = 50;  // Size of each tile in pixels
+
+canvas.width = gridSize * tileSize;
+canvas.height = gridSize * tileSize;
+
+// Sample maze layout (0 = empty, 1 = wall)
+const maze = [
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+    [1, 0, 1, 0, 1, 0, 1, 1, 0, 1],
+    [1, 0, 1, 0, 0, 0, 1, 0, 0, 1],
+    [1, 0, 1, 1, 1, 1, 1, 0, 1, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 0, 1],
+    [1, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+    [1, 0, 1, 0, 1, 0, 1, 1, 0, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+];
+
+// Function to draw the grid
+function drawGrid() {
+    for (let row = 0; row < gridSize; row++) {
+        for (let col = 0; col < gridSize; col++) {
+            if (maze[row][col] === 1) {
+                ctx.fillStyle = "black";  // Wall color
+            } else {
+                ctx.fillStyle = "white";  // Empty space
+            }
+            ctx.fillRect(col * tileSize, row * tileSize, tileSize, tileSize);
+            ctx.strokeRect(col * tileSize, row * tileSize, tileSize, tileSize);
+        }
+    }
+}
+
+// Initial draw
+drawGrid();
+
+//PLAYERS
+const players = {
+    "player1": { row: 1, col: 1, color: "red" },
+    "player2": { row: 8, col: 8, color: "blue" }
+};
+
+// Function to draw players on the grid
+function drawPlayers() {
+    for (const playerId in players) {
+        const player = players[playerId];
+        ctx.fillStyle = player.color;
+        ctx.fillRect(player.col * tileSize, player.row * tileSize, tileSize, tileSize);
+    }
+}
+
+// Update the draw function to include players
+function drawGame() {
+    drawGrid();
+    drawPlayers();
+}
+
+// Initial draw
+drawGame();
+
+//MOVEMENT LOGIC
+document.addEventListener("keydown", (event) => {
+    movePlayer("player1", event.key);
+});
+
+function movePlayer(playerId, key) {
+    const player = players[playerId];
+    if (!player) return;
+
+    let newRow = player.row;
+    let newCol = player.col;
+
+    // Handle movement keys
+    switch (key) {
+        case "ArrowUp":
+        case "w":
+            newRow -= 1;
+            break;
+        case "ArrowDown":
+        case "s":
+            newRow += 1;
+            break;
+        case "ArrowLeft":
+        case "a":
+            newCol -= 1;
+            break;
+        case "ArrowRight":
+        case "d":
+            newCol += 1;
+            break;
+        default:
+            return; // Ignore other keys
+    }
+
+    // Check if the new position is within bounds and not a wall
+    if (maze[newRow] && maze[newRow][newCol] === 0) {
+        player.row = newRow;
+        player.col = newCol;
+        drawGame(); // Redraw grid with new player position
+    }
+}
