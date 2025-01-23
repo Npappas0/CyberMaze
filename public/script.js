@@ -6,7 +6,7 @@ document.getElementById("createRoomBtn").addEventListener("click", async () => {
     
     const roomLink = document.getElementById("roomLink");
     roomLink.innerHTML = `Invite Link: <a href="?room=${data.roomId}">${data.inviteLink}</a>`;
-    roomLink.style.display = "block";
+    roomLink.style.display = "block"; // Show the invite link
 });
 
 document.getElementById("joinRoomBtn").addEventListener("click", () => {
@@ -25,7 +25,8 @@ function joinRoom(roomId, playerName) {
     socket.emit("join-room", { roomId, playerName });
 
     document.getElementById("roomIdDisplay").innerText = roomId;
-    document.getElementById("game-area").style.display = "block";
+    document.getElementById("game-container").style.display = "block";
+    document.getElementById("game-area").style.display = "block"; 
 }
 
 socket.on("player-joined", (players) => {
